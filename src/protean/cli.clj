@@ -36,6 +36,7 @@
         "  projects               (List projects)"
         "  project                -n myproject (List project)"
         "  project-usage          -n myproject (List curl statements to use API)"
+        "  project-test           -n myproject (Integration test simulation)"
         "  add-projects           -f project-config-file.edn (Add projects in a config file)"
         "  del-project            -n myproject (Delete a project)"
         "  add-project-error      -n myproject -s 500 (Add an error status code to a project)"
@@ -63,6 +64,10 @@
   (let [rsp (clt/get (str "http://" host ":" port "/projects/" name "/usage"))]
     (doseq [j (jsn/parse-string (:body rsp))] (println j))))
 
+(defn project-test [{:keys [host port name]}]
+  (let [rsp (clt/get (str "http://" host ":" port "/projects/" name "/test"))]
+    (println (:body rsp))))
+
 (defn add-projects [{:keys [file host port]}]
   (let [rsp (clt/put (str "http://" host ":" port "/projects")
               {:multipart [{:name "file"
@@ -76,13 +81,13 @@
 
 (defn add-project-error [{:keys [host port name status-err] :as options}]
   (let [rsp
-    (clt/put (str "http://" host ":" port 
+    (clt/put (str "http://" host ":" port
                   "/projects/" name "/errors/status/" status-err))]
     (project options)))
 
 (defn set-project-error-prob [{:keys [host port name level] :as options}]
   (let [rsp
-    (clt/put (str "http://" host ":" port 
+    (clt/put (str "http://" host ":" port
                   "/projects/" name "/errors/probability/" level))]
     (project options)))
 
@@ -119,6 +124,7 @@
       "projects" (projects options)
       "project" (project options)
       "project-usage" (project-usage options)
+      "project-test" (project-test options)
       "add-projects" (add-projects options)
       "del-project" (delete-project options)
       "add-project-error" (add-project-error options)
