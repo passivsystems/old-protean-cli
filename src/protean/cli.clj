@@ -5,7 +5,6 @@
   	        [clojure.tools.cli :refer [parse-opts]]
   	        [clj-http.client :as clt]
             [cheshire.core :as jsn])
-  (:use clojure.pprint)
   (:gen-class))
 
 (defmacro get-version []
