@@ -8,9 +8,9 @@ Command line interface for Protean.
 
 will show usage instructions.
 
-    protean projects
+    protean services
 
-will list configured projects.
+will list configured services.
 
 We recommend 'drip' (github.com/flatland/drip) to speed things up with the command line.
 
