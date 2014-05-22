@@ -1,4 +1,5 @@
 (ns protean.cli
+  "A basic command line interface for Protean."
   (:require [clojure.string :as string]
             [clojure.java.io :refer [file]]
   	        [clojure.tools.cli :refer [parse-opts]]
