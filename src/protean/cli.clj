@@ -5,6 +5,7 @@
   	        [clojure.tools.cli :refer [parse-opts]]
   	        [clj-http.client :as clt]
             [cheshire.core :as jsn])
+  (:use [clojure.pprint])
   (:gen-class))
 
 (defmacro get-version []
@@ -45,6 +46,9 @@
         "Please refer to the manual page for more information."]
        (string/join \newline)))
 
+(defn pprint-str [rsp]
+  (pprint (jsn/parse-string (:body rsp))))
+
 (defn error-msg [errors]
   (str "The following errors occurred while parsing your command:\n\n"
        (string/join \newline errors)))
@@ -53,11 +57,11 @@
 
 (defn projects [{:keys [host port]}]
 	(let [rsp (clt/get (str "http://" host ":" port "/services"))]
-    (println (:body rsp))))
+    (pprint-str rsp)))
 
 (defn project [{:keys [host port name]}]
   (let [rsp (clt/get (str "http://" host ":" port "/services/" name))]
-    (println (:body rsp))))
+    (pprint-str rsp)))
 
 (defn project-usage [{:keys [host port name]}]
   (let [rsp (clt/get (str "http://" host ":" port "/services/" name "/usage"))]
