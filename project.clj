@@ -1,4 +1,4 @@
-(defproject protean-cli "0.4.0"
+(defproject protean-cli "0.5.0-SNAPSHOT"
   :description "Command line interface for Protean"
   :url "http://github.com/passivsystems/protean-cli"
   :license {:name "Apache License v2.0"
