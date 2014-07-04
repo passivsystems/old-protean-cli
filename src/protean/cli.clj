@@ -16,11 +16,10 @@
 (defn- codices->silk [f n d]
   (let [codices (edn/read-string (slurp f))
         locs {"locs" (if n (vector n) n)}
-        an (pta/analysis-> "localhost" 8080 codices locs)
-        doc-edn (map #(select-keys % [:uri :method ]) an)]
-    (doseq [e doc-edn]
+        an (pta/analysis-> "localhost" 8080 codices locs)]
+    (doseq [e an]
       (let [path  (stg/replace (-> (URI. (:uri e)) (.getPath)) #"/" "-")]
-        (spit (str d "/" (name (:method e) ) path ".edn") (pr-str e))))))
+        (spit (str d "/" (name (:method e)) path ".edn") (pr-str (update-in e [:method] name)))))))
 
 (def cli-options
   [["-p" "--port PORT" "Port number"
