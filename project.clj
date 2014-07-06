@@ -6,6 +6,7 @@
   :min-lein-version "2.0.0"
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/tools.cli "0.3.1"]
+                 [ring/ring-codec "1.0.0"]
                  [clj-http "0.9.1"]
                  [cheshire "5.3.1"]
                  [com.taoensso/timbre "3.1.6"]

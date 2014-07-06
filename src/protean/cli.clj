@@ -4,9 +4,11 @@
             [clojure.edn :as edn]
             [clojure.java.io :refer [file]]
   	        [clojure.tools.cli :refer [parse-opts]]
+            [ring.util.codec :as cod]
   	        [clj-http.client :as clt]
             [cheshire.core :as jsn]
-            [protean.transformations.analysis :as pta])
+            [protean.transformations.analysis :as pta]
+            [protean.transformations.curly :as txc])
   (:import java.net.URI)
   (:gen-class))
 
@@ -18,8 +20,9 @@
         locs {"locs" (if n (vector n) n)}
         an (pta/analysis-> "localhost" 8080 codices locs)]
     (doseq [e an]
-      (let [path  (stg/replace (-> (URI. (:uri e)) (.getPath)) #"/" "-")]
-        (spit (str d "/" (name (:method e)) path ".edn") (pr-str (update-in e [:method] name)))))))
+      (let [path  (stg/replace (-> (URI. (:uri e)) (.getPath)) #"/" "-")
+            curl (assoc e :curl (cod/url-decode (txc/curly-> e)))]
+        (spit (str d "/" (name (:method curl)) path ".edn") (pr-str (update-in curl [:method] name)))))))
 
 (def cli-options
   [["-p" "--port PORT" "Port number"
