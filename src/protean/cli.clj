@@ -23,7 +23,7 @@
       (let [path  (stg/replace (-> (URI. (:uri e)) (.getPath)) #"/" "-")
             id (str (name (:method e)) path)
             full (assoc e :id id :curl (cod/url-decode (txc/curly-> e)))]
-        (spit (str d "/" (name (:method full)) path ".edn") (pr-str (update-in full [:method] name)))))))
+        (spit (str d "/" id ".edn") (pr-str (update-in full [:method] name)))))))
 
 (def cli-options
   [["-p" "--port PORT" "Port number"
