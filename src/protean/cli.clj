@@ -21,8 +21,9 @@
         an (pta/analysis-> "localhost" 8080 codices locs)]
     (doseq [e an]
       (let [path  (stg/replace (-> (URI. (:uri e)) (.getPath)) #"/" "-")
-            curl (assoc e :curl (cod/url-decode (txc/curly-> e)))]
-        (spit (str d "/" (name (:method curl)) path ".edn") (pr-str (update-in curl [:method] name)))))))
+            id (str (name (:method e)) path)
+            full (assoc e :id id :curl (cod/url-decode (txc/curly-> e)))]
+        (spit (str d "/" (name (:method full)) path ".edn") (pr-str (update-in full [:method] name)))))))
 
 (def cli-options
   [["-p" "--port PORT" "Port number"
