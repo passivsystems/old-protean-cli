@@ -18,11 +18,12 @@
 (defn- codices->silk [f n d]
   (let [codices (edn/read-string (slurp f))
         locs {"locs" (if n (vector n) n)}
-        an (pta/analysis-> "localhost" 8080 codices locs)]
+        an (pta/analysis-> "host" 1234 codices locs)]
     (doseq [e an]
-      (let [path  (stg/replace (-> (URI. (:uri e)) (.getPath)) #"/" "-")
+      (let [uri-path (-> (URI. (:uri e)) (.getPath))
+            path  (stg/replace uri-path #"/" "-")
             id (str (name (:method e)) path)
-            full (assoc e :id id :curl (cod/url-decode (txc/curly-> e)))]
+            full (assoc e :id id :uri-path (subs uri-path 1) :curl (cod/url-decode (txc/curly-> e)))]
         (spit (str d "/" id ".edn") (pr-str (update-in full [:method] name)))))))
 
 (def cli-options
