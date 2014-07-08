@@ -23,7 +23,7 @@
       (let [uri-path (-> (URI. (:uri e)) (.getPath))
             path  (stg/replace uri-path #"/" "-")
             id (str (name (:method e)) path)
-            full (assoc e :id id :uri-path (subs uri-path 1) :curl (cod/url-decode (txc/curly-> e)))]
+            full (assoc e :id id :path (subs uri-path 1) :curl (cod/url-decode (txc/curly-> e)))]
         (spit (str d "/" id ".edn") (pr-str (update-in full [:method] name)))))))
 
 (def cli-options
