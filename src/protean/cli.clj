@@ -1,15 +1,31 @@
 (ns protean.cli
   "A basic command line interface for Protean."
-  (:require [clojure.string :as string]
+  (:require [clojure.string :as stg]
+            [clojure.edn :as edn]
             [clojure.java.io :refer [file]]
   	        [clojure.tools.cli :refer [parse-opts]]
+            [ring.util.codec :as cod]
   	        [clj-http.client :as clt]
-            [cheshire.core :as jsn])
+            [cheshire.core :as jsn]
+            [protean.transformations.analysis :as pta]
+            [protean.transformations.curly :as txc])
   (:use [clojure.pprint])
+  (:import java.net.URI)
   (:gen-class))
 
 (defmacro get-version []
   (System/getProperty "protean-cli.version"))
+
+(defn- codices->silk [f n d]
+  (let [codices (edn/read-string (slurp f))
+        locs {"locs" (if n (vector n) n)}
+        an (pta/analysis-> "host" 1234 codices locs)]
+    (doseq [e an]
+      (let [uri-path (-> (URI. (:uri e)) (.getPath))
+            path  (stg/replace uri-path #"/" "-")
+            id (str (name (:method e)) path)
+            full (assoc e :id id :path (subs uri-path 1) :curl (cod/url-decode (txc/curly-> e)))]
+        (spit (str d "/" id ".edn") (pr-str (update-in full [:method] name)))))))
 
 (def cli-options
   [["-p" "--port PORT" "Port number"
@@ -20,6 +36,7 @@
      :default "localhost"]
    ["-n" "--name NAME" "Project name"]
    ["-f" "--file FILE" "Project configuration file"]
+   ["-d" "--directory DIRECTORY" "Documentation site"]
    ["-s" "--status-err STATUS-ERROR" "Error status code"]
    ["-l"  "--level LEVEL" "Error level (probability)"]
    ["-h" "--help"]])
@@ -42,16 +59,17 @@
         "  add-service-error      -n myservice -s 500 (Add an error status code to a service)"
         "  set-service-error-prob -n myservice -l 10 (Set error probability)"
         "  del-service-errors     -n myservice (Delete error response codes)"
+        "  doc                    -f codex -n name -d doc-site (Build API docs)"
         ""
         "Please refer to the manual page for more information."]
-       (string/join \newline)))
+       (stg/join \newline)))
 
 (defn pprint-str [rsp]
   (pprint (jsn/parse-string (:body rsp))))
 
 (defn error-msg [errors]
   (str "The following errors occurred while parsing your command:\n\n"
-       (string/join \newline errors)))
+       (stg/join \newline errors)))
 
 (defn exit [status msg] (println msg) (System/exit status))
 
@@ -94,6 +112,9 @@
   (let [rsp (clt/delete (str "http://" host ":" port "/services/" name "/errors"))]
     (project options)))
 
+(defn doc [{:keys [host port file name directory] :as options}]
+  (codices->silk file name directory))
+
 (defn -main [& args]
   (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)]
     ;; Handle help and error conditions
@@ -114,7 +135,11 @@
            (or (not (:name options))
                (not (:level options)))) (exit 0 (usage summary))
       (and (= (first arguments) "del-service-errors")
-           (not (:name options))) (exit 0 (usage summary)))
+           (not (:name options))) (exit 0 (usage summary))
+      (and (= (first arguments) "doc")
+                (or (not (:name options))
+                    (not (:file options))
+                    (not (:directory options)))) (exit 0 (usage summary)))
     ;; Execute program with options
     (println "Protean Command Line Interface")
     (println (get-version))
@@ -128,4 +153,5 @@
       "add-service-error" (add-project-error options)
       "set-service-error-prob" (set-project-error-prob options)
       "del-service-errors" (del-project-errors options)
+      "doc" (doc options)
       (exit 1 (usage summary)))))
