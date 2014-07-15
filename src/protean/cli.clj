@@ -7,14 +7,24 @@
             [ring.util.codec :as cod]
   	        [clj-http.client :as clt]
             [cheshire.core :as jsn]
+            [protean.transformations.coerce :as ptc]
             [protean.transformations.analysis :as pta]
-            [protean.transformations.curly :as txc])
+            [protean.transformations.curly :as txc]
+            [protean.transformations.sim :as pts])
   (:use [clojure.pprint])
   (:import java.net.URI)
   (:gen-class))
 
 (defmacro get-version []
   (System/getProperty "protean-cli.version"))
+
+(defn- body [ctype body]
+  (if-let [b body]
+    (cond
+      (= ctype pts/xml) (ptc/pretty-xml-> b)
+      (= ctype pts/txt) b
+      :else (ptc/js-> b))
+    "N/A"))
 
 (defn- codices->silk [f n d]
   (let [codices (edn/read-string (slurp f))
@@ -24,7 +34,8 @@
       (let [uri-path (-> (URI. (:uri e)) (.getPath))
             path  (stg/replace uri-path #"/" "-")
             id (str (name (:method e)) path)
-            full (assoc e :id id :path (subs uri-path 1) :curl (cod/url-decode (txc/curly-> e)))]
+            body (body (get-in e [:codex :content-type]) (get-in e [:codex :body]))
+            full (assoc e :id id :path (subs uri-path 1) :curl (cod/url-decode (txc/curly-> e)) :sample-response body)]
         (spit (str d "/" id ".edn") (pr-str (update-in full [:method] name)))))))
 
 (def cli-options
