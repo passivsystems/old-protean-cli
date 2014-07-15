@@ -6,7 +6,6 @@
   	        [clojure.tools.cli :refer [parse-opts]]
             [ring.util.codec :as cod]
   	        [clj-http.client :as clt]
-            [cheshire.core :as jsn]
             [protean.transformations.coerce :as ptc]
             [protean.transformations.analysis :as pta]
             [protean.transformations.curly :as txc]
@@ -75,9 +74,6 @@
         "Please refer to the manual page for more information."]
        (stg/join \newline)))
 
-(defn pprint-str [rsp]
-  (pprint (jsn/parse-string (:body rsp))))
-
 (defn error-msg [errors]
   (str "The following errors occurred while parsing your command:\n\n"
        (stg/join \newline errors)))
@@ -86,15 +82,15 @@
 
 (defn projects [{:keys [host port]}]
 	(let [rsp (clt/get (str "http://" host ":" port "/services"))]
-    (pprint-str rsp)))
+    (ptc/pretty-clj-> rsp)))
 
 (defn project [{:keys [host port name]}]
   (let [rsp (clt/get (str "http://" host ":" port "/services/" name))]
-    (pprint-str rsp)))
+    (ptc/pretty-clj-> rsp)))
 
 (defn project-usage [{:keys [host port name]}]
   (let [rsp (clt/get (str "http://" host ":" port "/services/" name "/usage"))]
-    (doseq [j (jsn/parse-string (:body rsp))] (println j))))
+    (doseq [j (ptc/clj-> (:body rsp))] (println j))))
 
 (defn add-projects [{:keys [file host port]}]
   (let [rsp (clt/put (str "http://" host ":" port "/services")
