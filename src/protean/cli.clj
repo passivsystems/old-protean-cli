@@ -9,7 +9,7 @@
             [protean.transformations.coerce :as ptc]
             [protean.transformations.analysis :as pta]
             [protean.transformations.curly :as txc]
-            [protean.transformations.sim :as pts])
+            [protean.transformations.http :as pth])
   (:import java.net.URI)
   (:gen-class))
 
@@ -19,8 +19,8 @@
 (defn- body [ctype body]
   (if-let [b body]
     (cond
-      (= ctype pts/xml) (ptc/pretty-xml-> b)
-      (= ctype pts/txt) b
+      (= ctype pth/xml) (ptc/pretty-xml-> b)
+      (= ctype pth/txt) b
       :else (ptc/js-> b))
     "N/A"))
 
@@ -81,11 +81,11 @@
 
 (defn projects [{:keys [host port]}]
 	(let [rsp (clt/get (str "http://" host ":" port "/services"))]
-    (ptc/pretty-clj-> rsp)))
+    (ptc/pretty-clj-> (:body rsp))))
 
 (defn project [{:keys [host port name]}]
   (let [rsp (clt/get (str "http://" host ":" port "/services/" name))]
-    (ptc/pretty-clj-> rsp)))
+    (ptc/pretty-clj-> (:body rsp))))
 
 (defn project-usage [{:keys [host port name]}]
   (let [rsp (clt/get (str "http://" host ":" port "/services/" name "/usage"))]
