@@ -10,7 +10,6 @@
             [protean.transformations.analysis :as pta]
             [protean.transformations.curly :as txc]
             [protean.transformations.sim :as pts])
-  (:use [clojure.pprint])
   (:import java.net.URI)
   (:gen-class))
 
