@@ -1,4 +1,4 @@
-(defproject protean-cli "0.5.0-SNAPSHOT"
+(defproject protean-cli "0.5.0"
   :description "Command line interface for Protean"
   :url "http://github.com/passivsystems/protean-cli"
   :license {:name "Apache License v2.0"
@@ -9,6 +9,6 @@
                  [ring/ring-codec "1.0.0"]
                  [clj-http "0.9.1"]
                  [com.taoensso/timbre "3.1.6"]
-                 [com.passivsystems/protean-core "0.2.0-SNAPSHOT"]]
+                 [com.passivsystems/protean-core "0.2.0"]]
   :aot :all
   :main protean.cli)
