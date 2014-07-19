@@ -6,10 +6,10 @@
   	        [clojure.tools.cli :refer [parse-opts]]
             [ring.util.codec :as cod]
   	        [clj-http.client :as clt]
-            [protean.transformations.coerce :as ptc]
-            [protean.transformations.analysis :as pta]
-            [protean.transformations.curly :as txc]
-            [protean.transformations.http :as pth])
+            [protean.protocol.http :as pth]
+            [protean.transformation.coerce :as ptc]
+            [protean.transformation.analysis :as pta]
+            [protean.transformation.curly :as txc])
   (:import java.net.URI)
   (:gen-class))
 
