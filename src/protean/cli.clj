@@ -16,6 +16,13 @@
 (defmacro get-version []
   (System/getProperty "protean-cli.version"))
 
+(defn- cli-banner []
+  (println "              _")
+  (println " _ __ _ _ ___| |_ ___ __ _ _ _ ")
+  (println "| '_ \\ '_/ _ \\  _/ -_) _` | ' \\")
+  (println "| .__/_| \\___/\\__\\___\\__,_|_||_|")
+  (println "|_|                            "))
+
 (defn- body [ctype body]
   (if-let [b body]
     (cond
@@ -51,8 +58,9 @@
    ["-h" "--help"]])
 
 (defn usage [options-summary]
-  (->> ["Protean Command Line Interface"
-        (get-version)
+  (cli-banner)
+  (->> [""
+        (str "v" (get-version))
         ""
         "Usage: program-name [options] action"
         ""
@@ -147,8 +155,9 @@
                     (not (:file options))
                     (not (:directory options)))) (exit 0 (usage summary)))
     ;; Execute program with options
-    (println "Protean Command Line Interface")
-    (println (get-version))
+    (cli-banner)
+    (println "")
+    (println (str "v" (get-version)))
     (println "\n")
     (case (first arguments)
       "services" (projects options)
