@@ -9,6 +9,7 @@
                  [ring/ring-codec "1.0.0"]
                  [clj-http "0.9.1"]
                  [com.taoensso/timbre "3.1.6"]
+                 [io.aviso/pretty "0.1.12"]
                  [com.passivsystems/protean-core "0.3.0-SNAPSHOT"]]
   :aot :all
   :main protean.cli)

@@ -6,6 +6,7 @@
   	        [clojure.tools.cli :refer [parse-opts]]
             [ring.util.codec :as cod]
   	        [clj-http.client :as clt]
+            [io.aviso.ansi :as aa]
             [protean.protocol.http :as pth]
             [protean.transformation.coerce :as ptc]
             [protean.transformation.analysis :as pta]
@@ -46,7 +47,7 @@
         (spit (str d "/" id ".edn") (pr-str (update-in full [:method] name)))))))
 
 (defn- test-sim [h p f b]
-  (println "Testing simulation")
+  (println (aa/bold-green "Testing simulation..."))
   (let [codices (edn/read-string (slurp f))
         tests (tc/clj-httpify h p codices b)
         results (map #(t/test! %) tests)]
@@ -56,7 +57,7 @@
         (println "Test : " t ", status : " s)))))
 
 (defn- test-service [h p f b]
-  (println "Testing service"))
+  (println (aa/bold-red "Testing service...")))
 
 (def cli-options
   [["-p" "--port PORT" "Port number"
