@@ -9,7 +9,9 @@
             [protean.protocol.http :as pth]
             [protean.transformation.coerce :as ptc]
             [protean.transformation.analysis :as pta]
-            [protean.transformation.curly :as txc])
+            [protean.transformation.curly :as txc]
+            [protean.transformation.testy-cljhttp :as tc]
+            [protean.test :as t])
   (:import java.net.URI)
   (:gen-class))
 
@@ -43,6 +45,19 @@
             full (assoc e :id id :path (subs uri-path 1) :curl (cod/url-decode (txc/curly-> e)) :sample-response body)]
         (spit (str d "/" id ".edn") (pr-str (update-in full [:method] name)))))))
 
+(defn- test-sim [h p f b]
+  (println "Testing simulation")
+  (let [codices (edn/read-string (slurp f))
+        tests (tc/clj-httpify h p codices b)
+        results (map #(t/test! %) tests)]
+    (doseq [r results]
+      (let [t (first r)
+            s (:status (last r))]
+        (println "Test : " t ", status : " s)))))
+
+(defn- test-service [h p f b]
+  (println "Testing service"))
+
 (def cli-options
   [["-p" "--port PORT" "Port number"
     :default 3001
@@ -53,6 +68,7 @@
    ["-n" "--name NAME" "Project name"]
    ["-f" "--file FILE" "Project configuration file"]
    ["-d" "--directory DIRECTORY" "Documentation site"]
+   ["-b" "--body BODY" "JSON body"]
    ["-s" "--status-err STATUS-ERROR" "Error status code"]
    ["-l"  "--level LEVEL" "Error level (probability)"]
    ["-h" "--help"]])
@@ -77,6 +93,7 @@
         "  set-service-error-prob -n myservice -l 10 (Set error probability)"
         "  del-service-errors     -n myservice (Delete error response codes)"
         "  doc                    -f codex -n name -d doc-site (Build API docs)"
+        "  test                   -f codex -b body (Test simulation or service)"
         ""
         "Please refer to the manual page for more information."]
        (stg/join \newline)))
@@ -129,6 +146,11 @@
 (defn doc [{:keys [host port file name directory] :as options}]
   (codices->silk file name directory))
 
+(defn test-locs [{:keys [host port file body] :as options}]
+  (let [b (ptc/clj-> body) tp (b "port") th (b "host")
+        p (or tp 3000) h (or th host)]
+    (if (or tp th) (test-service h p file b) (test-sim h p file b))))
+
 (defn -main [& args]
   (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)]
     ;; Handle help and error conditions
@@ -153,7 +175,10 @@
       (and (= (first arguments) "doc")
                 (or (not (:name options))
                     (not (:file options))
-                    (not (:directory options)))) (exit 0 (usage summary)))
+                    (not (:directory options)))) (exit 0 (usage summary))
+      (and (= (first arguments) "test")
+                (or (not (:file options))
+                    (not (:body options)))) (exit 0 (usage summary)))
     ;; Execute program with options
     (cli-banner)
     (println "")
@@ -169,4 +194,5 @@
       "set-service-error-prob" (set-project-error-prob options)
       "del-service-errors" (del-project-errors options)
       "doc" (doc options)
+      "test" (test-locs options)
       (exit 1 (usage summary)))))
