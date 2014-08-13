@@ -22,7 +22,7 @@
   (println "              _")
   (println " _ __ _ _ ___| |_ ___ __ _ _ _ ")
   (println "| '_ \\ '_/ _ \\  _/ -_) _` | ' \\")
-  (println "| .__/_| \\___/\\__\\___\\__,_|_||_|")
+  (println (str "| .__/_| \\___/\\__\\___\\__,_|_||_| " "v" (get-version)))
   (println "|_|                            "))
 
 (defn- body [ctype body]
@@ -76,8 +76,6 @@
 (defn usage [options-summary]
   (cli-banner)
   (->> [""
-        (str "v" (get-version))
-        ""
         "Usage: program-name [options] action"
         ""
         "Options:"
@@ -181,8 +179,6 @@
                     (not (:body options)))) (exit 0 (usage summary)))
     ;; Execute program with options
     (cli-banner)
-    (println "")
-    (println (str "v" (get-version)))
     (println "\n")
     (case (first arguments)
       "services" (projects options)
