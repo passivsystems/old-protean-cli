@@ -12,6 +12,7 @@
             [protean.transformation.analysis :as pta]
             [protean.transformation.curly :as txc]
             [protean.transformation.testy-cljhttp :as tc]
+            [protean.command.bridge :as b]
             [protean.test :as t])
   (:import java.net.URI)
   (:gen-class))
@@ -48,7 +49,10 @@
 
 (defn- test-sim [h p f b]
   (println (aa/bold-green "Testing simulation..."))
+  (println "b : " b)
+  (println "locs : " (:locs b))
   (let [codices (edn/read-string (slurp f))
+        br (b/visit b codices)
         tests (tc/clj-httpify h p codices b)
         results (map #(t/test! %) tests)]
     (doseq [r results]
@@ -145,8 +149,14 @@
 (defn doc [{:keys [host port file name directory] :as options}]
   (codices->silk file name directory))
 
+(defn- nice-keys [m] (into {} (for [[k v] m] [(keyword k) v])))
+
+(defn- nice-vals [v] (into [] (map #(keyword %) v)))
+
+(defn- sane-corpus [m] (-> m nice-keys (update-in [:commands] nice-vals)))
+
 (defn test-locs [{:keys [host port file body] :as options}]
-  (let [b (ptc/clj-> body) tp (b "port") th (b "host")
+  (let [b (sane-corpus (ptc/clj-> body)) tp (b "port") th (b "host")
         p (or tp 3000) h (or th host)]
     (if (or tp th) (test-service h p file b) (test-sim h p file b))))
 
